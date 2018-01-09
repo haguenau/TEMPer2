@@ -3,6 +3,7 @@
 #include <strings.h>
 #include <usb.h>
 #include <errno.h>
+#include <sys/time.h>
 
 /*
  * Temper.c by Robert Kavaler (c) 2009 (relavak.com)
@@ -45,12 +46,13 @@
 int main(int argc, char **argv) {
   Temper *t;
   int ret;
-  int simple_output = 0;
+  int output_mode = 0;
 
   {
     char *arg = argv[1];
-    if (arg != NULL && arg[0] == '-' && arg[1] == 's' && arg[2] == '\0') {
-      simple_output = 1;
+    if (arg != NULL && arg[0] == '-'
+        && (arg[1] == 's' || arg[1] == 'j') && arg[2] == '\0') {
+      output_mode = arg[1];
     }
   }
 
@@ -87,19 +89,36 @@ int main(int argc, char **argv) {
     const unsigned int count = sizeof(data)/sizeof(TemperData);
     ret = TemperGetData(t,data, count);
 
-    if (simple_output) {
+    switch (output_mode) {
+    case 'j': {
+      struct timeval tv;
+      gettimeofday(&tv, NULL);
+      printf("{\"unix_time\":%lld,", (long long)tv.tv_sec);
       for (unsigned i = 0; i < count; ++i) {
-	printf("%.1f%c", data[i].value, i + 1 < count ? '\t' : '\n');
+        printf("\"v%u\":%.1f%s",
+               i, data[i].value, i + 1 < count ? "," : "}\n");
       }
-    } else {
+      break;
+    }
+
+    case 's': {
+      for (unsigned i = 0; i < count; ++i) {
+        printf("%.1f%c", data[i].value, i + 1 < count ? '\t' : '\n');
+      }
+      break;
+    }
+
+    default: {
       printf("%4d", ret);
       for (unsigned i = 0; i < count; ++i)
-	printf(";%f %s",
-	       data[i].value,
-	       TemperUnitToString(data[i].unit));
+        printf(";%f %s",
+               data[i].value,
+               TemperUnitToString(data[i].unit));
       char sn[80];
       TemperGetSerialNumber(t, sn, sizeof(sn));
       printf(";%s;%s\n", t->product->name, sn);
+      break;
+    }
     }
   }
 

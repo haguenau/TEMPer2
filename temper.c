@@ -74,8 +74,7 @@ int main(void) {
   if (0) {
     unsigned char buf[8];
     TemperInterruptRead(t, buf, sizeof(buf));
-  }
-  else {
+  } else {
     TemperData data[2];
     const unsigned int count = sizeof(data)/sizeof(TemperData);
     ret = TemperGetData(t,data, count);

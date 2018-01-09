@@ -42,10 +42,17 @@
 #define TEMPER_DEBUG 0
 #endif
 
-int main(void) {
+int main(int argc, char **argv) {
   Temper *t;
   int ret;
-  int simple_output = 1;
+  int simple_output = 0;
+
+  {
+    char *arg = argv[1];
+    if (arg != NULL && arg[0] == '-' && arg[1] == 's' && arg[2] == '\0') {
+      simple_output = 1;
+    }
+  }
 
   usb_set_debug(0);
   usb_init();

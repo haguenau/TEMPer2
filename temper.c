@@ -45,6 +45,7 @@
 int main(void) {
   Temper *t;
   int ret;
+  int simple_output = 1;
 
   usb_set_debug(0);
   usb_init();
@@ -78,14 +79,21 @@ int main(void) {
     TemperData data[2];
     const unsigned int count = sizeof(data)/sizeof(TemperData);
     ret = TemperGetData(t,data, count);
-    printf("%4d", ret);
-    for (unsigned i = 0; i < count; ++i)
-      printf(";%f %s",
-             data[i].value,
-             TemperUnitToString(data[i].unit));
-    char sn[80];
-    TemperGetSerialNumber(t, sn, sizeof(sn));
-    printf(";%s;%s\n", t->product->name, sn);
+
+    if (simple_output) {
+      for (unsigned i = 0; i < count; ++i) {
+	printf("%.1f%c", data[i].value, i + 1 < count ? '\t' : '\n');
+      }
+    } else {
+      printf("%4d", ret);
+      for (unsigned i = 0; i < count; ++i)
+	printf(";%f %s",
+	       data[i].value,
+	       TemperUnitToString(data[i].unit));
+      char sn[80];
+      TemperGetSerialNumber(t, sn, sizeof(sn));
+      printf(";%s;%s\n", t->product->name, sn);
+    }
   }
 
   return 0;

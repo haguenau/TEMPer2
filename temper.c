@@ -93,10 +93,10 @@ int main(int argc, char **argv) {
     case 'j': {
       struct timeval tv;
       gettimeofday(&tv, NULL);
-      printf("{\"unix_time\":%lld,", (long long)tv.tv_sec);
+      printf("{\"unix_time\":%lld,\"data\":{", (long long)tv.tv_sec);
       for (unsigned i = 0; i < count; ++i) {
-        printf("\"v%u\":%.1f%s",
-               i, data[i].value, i + 1 < count ? "," : "}\n");
+        printf("\"%u\":%d%s",
+               i, (int)(1000 * data[i].value), i + 1 < count ? "," : "}}\n");
       }
       break;
     }
